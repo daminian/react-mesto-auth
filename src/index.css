@@ -1,0 +1,79 @@
+@import url(./vendor/normalize.css);
+@import url(./vendor/inter/inter.css);
+@import url(./blocks/root/root.css);
+@import url(./blocks/header/header.css);
+@import url(./blocks/profile/profile.css);
+@import url(./blocks/grid/grid.css);
+@import url(./blocks/cards/cards.css);
+@import url(./blocks/footer/footer.css);
+@import url(./blocks/popup/popup.css);
+@import url(./blocks/popup/__opened/popup__opened.css);
+@import url(./blocks/cards/__like/_active/cards__like_active.css);
+@import url(./blocks/login/login.css);
+
+.register__welcome{
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 29px;    
+    text-align: center;
+    margin-top: 60px;
+}
+
+.register__form{
+    display: flex;
+    flex-direction: column;
+    width: 358px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.register__input{
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #CCCCCC;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.register__button{
+    margin-top: 194px;
+    width: 358px;
+    height: 50px;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    line-height: 22px;
+    text-align: center;
+}
+
+.register__signin{
+    margin-top: 15px;
+    text-align: center;
+}
+
+.register__link{
+    text-decoration: none;
+    color: white;
+}
+
+.popup__image{
+    width: 120px;
+    height: 120px;
+    background-image: url(../src/images/success.svg);
+    margin-top: 60px;
+    align-self: center;
+}
+
+.popup__text{
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+    margin: 32px 36px 60px;
+    white-space: pre-wrap;
+}
