@@ -14,3 +14,28 @@ export const register = (password, email) => {
     })
     .then(checkResponce)
 };
+
+export const authorization = (password, email) => {
+    return fetch(`${BASE_URL}/signin`, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json" 
+        },
+        body: JSON.stringify({
+            "password": `${password}`,
+            "email": `${email}`
+        })
+    })
+    .then(checkResponce)
+}
+
+export const getContent = (token) => {
+    return fetch(`${BASE_URL}/users/me`, {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization" : `Bearer ${token}`
+        }
+    })
+    .then(checkResponce)
+}

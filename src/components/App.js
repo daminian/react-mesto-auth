@@ -1,8 +1,8 @@
 import React from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import { Route, Redirect, Switch, useHistory } from 'react-router-dom';
 import Footer from './Footer.js';
 import Header from './Header.js';
-import Main from './Main.js';
+import Main from './Main.jsx';
 import EditPofilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
@@ -24,7 +24,8 @@ function App() {
   const [editAvatarIsOpen , isEditAvatarPopupOpen] = React.useState(false)
   const [selectedCard, setSelectedCard] = React.useState({state:false, src: ''});
   const [infoTooltipIsOpen , isinfoTooltipOpen] = React.useState(false)
-  const [isLoggedIn, setLoggedIn] = React.useState(false);
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const history = useHistory();
 
   function handleCardClick(props) {
     setSelectedCard({state: true, src: props.link, name: props.name})
@@ -46,8 +47,43 @@ function App() {
     isinfoTooltipOpen(true)
     console.log(password, email)
     mestoAuth.register(password, email)
-      .then(data => console.log(data))
+      .then(data => {
+        if (data) {
+          setCurrentUser({
+            _id: data._id,
+            email: data.email
+          })
+          history.push('/sign-in')
+        }
+      })
       .catch(err => console.log(err))
+  }
+
+  function handleLoginClick(password, email) {
+    mestoAuth.authorization(password, email)
+      .then(data => {
+        if(data.token) {
+          localStorage.setItem('token', data.token)
+          setCurrentUser({
+            token: data.token
+          })
+          setLoggedIn(true)
+          history.push('/')
+        }
+        
+      })
+      .catch(err => console.log(err));
+  }
+
+  function tokenCheck() {
+    const token = localStorage.getItem('token')
+    mestoAuth.getContent(token)
+    .then(res => {
+      if(res.data.email) {
+        setLoggedIn(true)
+        history.push('/')
+      }
+    })
   }
 
   function closeAllPopups() {
@@ -140,6 +176,7 @@ function App() {
         .catch((err) => {
             console.log(err)
         })
+        tokenCheck()
   },[])
 
   return (
@@ -147,7 +184,7 @@ function App() {
     <Header />
     <Switch>
       <Route path="/sign-in">
-        <Login />
+        <Login handleLogin={handleLoginClick}/>
       </Route>
       <Route path="/sign-up">
         <Register handleRegister={handleRegisterClick}/>
@@ -156,10 +193,10 @@ function App() {
         <Main onEditProfile={handleEditProfileClick} onAddPlace={handleAddCardClick} onEditAvatar={handleEditAvatarClick} onCardClick={handleCardClick} 
         cards={cards} onCardLike={handleCardLike} onCardDelete={handleCardDelete}>
         </Main>
-      }>
+      }  loggedIn={loggedIn}>
       </ProtectedRoute>
-      <Route exact path="/">
-        {isLoggedIn ? <Redirect to="/sign-up" /> : <Redirect to="/sign-in" />}
+      <Route path="/">
+        {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
       </Route>
     </Switch>
     <Footer />

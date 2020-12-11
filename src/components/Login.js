@@ -1,7 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 
-function Login() {
+function Login({handleLogin}) {
 
   const [data, setData] = React.useState({
     password: '',
@@ -18,7 +18,8 @@ function Login() {
 
   function handleSubmit(e) {
       e.preventDefault();
-
+      let {password, email} = data
+      handleLogin(password, email)
     }
 
     return (
