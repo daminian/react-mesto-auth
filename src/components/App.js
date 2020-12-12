@@ -1,17 +1,17 @@
 import React from 'react';
-import { Route, Redirect, Switch, useHistory } from 'react-router-dom';
-import Footer from './Footer.js';
-import Header from './Header.js';
-import Main from './Main.jsx';
-import EditPofilePopup from './EditProfilePopup.js';
-import EditAvatarPopup from './EditAvatarPopup.js';
-import AddPlacePopup from './AddPlacePopup.js';
-import ImagePopup from './ImagePopup.js';
-import api from '../utils/api.js';
+import { Route, Redirect, Switch, useHistory, withRouter } from 'react-router-dom';
+import Footer from './Footer';
+import Header from './Header';
+import Main from './Main';
+import EditPofilePopup from './EditProfilePopup';
+import EditAvatarPopup from './EditAvatarPopup';
+import AddPlacePopup from './AddPlacePopup';
+import ImagePopup from './ImagePopup';
+import api from '../utils/api';
 import {CurrentUserContext} from '../contexts/CurrentUserContext';
-import Login from './Login.js';
-import Register from './Register.js';
-import InfoTooltip from './InfoTooltip.js';
+import Login from './Login';
+import Register from './Register';
+import InfoTooltip from './InfoTooltip';
 import ProtectedRoute from './ProtectedRoute';
 import * as mestoAuth from './mestoAuth';
 
@@ -43,49 +43,7 @@ function App() {
     isEditAvatarPopupOpen(true)
   }
 
-  function handleRegisterClick(password, email) {
-    isinfoTooltipOpen(true)
-    console.log(password, email)
-    mestoAuth.register(password, email)
-      .then(data => {
-        if (data) {
-          setCurrentUser({
-            _id: data._id,
-            email: data.email
-          })
-          history.push('/sign-in')
-        }
-      })
-      .catch(err => console.log(err))
-  }
-
-  function handleLoginClick(password, email) {
-    mestoAuth.authorization(password, email)
-      .then(data => {
-        if(data.token) {
-          localStorage.setItem('token', data.token)
-          setCurrentUser({
-            token: data.token
-          })
-          setLoggedIn(true)
-          history.push('/')
-        }
-        
-      })
-      .catch(err => console.log(err));
-  }
-
-  function tokenCheck() {
-    const token = localStorage.getItem('token')
-    mestoAuth.getContent(token)
-    .then(res => {
-      if(res.data.email) {
-        setLoggedIn(true)
-        history.push('/')
-      }
-    })
-  }
-
+  
   function closeAllPopups() {
     isEditProfilePopupOpen(false)
     isAddPlacePopupOpen(false)
@@ -112,7 +70,7 @@ function App() {
      closeAllPopups()
     })
     .catch((err) => {
-     console.log(err)
+      console.log(err)
     })
   }
 
@@ -125,20 +83,20 @@ function App() {
       setCards(newCards);
     })
     .catch((err) => {
-        console.log(err)
+      console.log(err)
     })
   }
-
+  
   function handleCardDelete(card) {
     api.deleteCard(card._id)
     .then(() => {
-        const newCards = cards.filter((item) => {
-          return item._id !== card._id
-        });
+      const newCards = cards.filter((item) => {
+        return item._id !== card._id
+      });
         setCards(newCards);
-    })
+      })
     .catch((err) => {
-        console.log(err)
+      console.log(err)
     })
   }
   
@@ -152,7 +110,7 @@ function App() {
       console.log(err)
     })
   }
-
+  
   React.useEffect(() => {
     api.getAppInfo()
         .then((data) => {
@@ -161,7 +119,7 @@ function App() {
                 name: data.user.name,
                 about: data.user.about,
                 avatar: data.user.avatar,
-              _id: data.user._id
+                _id: data.user._id
             })
             const cardsList = data.cards.map((item) => ({
               _id: item._id,
@@ -176,26 +134,69 @@ function App() {
         .catch((err) => {
             console.log(err)
         })
-        tokenCheck()
   },[])
+
+  React.useEffect(() => {
+    tokenCheck()
+  },[])
+
+  function handleRegisterClick(password, email) {
+    isinfoTooltipOpen(true)
+    mestoAuth.register(password, email)
+      .then(data => {
+        if (data) {
+          setCurrentUser({
+            ...currentUser,
+            email: data.data.email
+          })
+          history.push('/sign-in')
+        }
+      })
+      .catch(err => console.log(err))
+  }
+
+  function handleLoginClick(password, email) {
+    mestoAuth.authorization(password, email)
+      .then(data => {
+        if(data.token) {
+          localStorage.setItem('token', data.token)
+          setLoggedIn(true)
+          history.push('/')
+        }
+        
+      })
+      .catch(err => console.log(err));
+  }
+
+  function tokenCheck() {
+    const token = localStorage.getItem('token')
+    mestoAuth.getContent(token)
+    .then(res => {
+      if(res.data.email) {
+        setLoggedIn(true)
+        history.push('/')
+      }
+    })
+  }
+
+  const handleLogoutClick = () => {
+    localStorage.clear('token')
+    setLoggedIn(false)
+  }
 
   return (
   <CurrentUserContext.Provider value={currentUser}>
-    <Header />
+    <Header onLinkClick={handleLogoutClick} linkText={'Выйти'}/>
     <Switch>
+      <ProtectedRoute exact path="/" loggedIn={loggedIn} component={Main} onEditProfile={handleEditProfileClick} onAddPlace={handleAddCardClick} onEditAvatar={handleEditAvatarClick} onCardClick={handleCardClick} 
+    cards={cards} onCardLike={handleCardLike} onCardDelete={handleCardDelete}/>
       <Route path="/sign-in">
         <Login handleLogin={handleLoginClick}/>
       </Route>
       <Route path="/sign-up">
         <Register handleRegister={handleRegisterClick}/>
       </Route>
-      <ProtectedRoute path="/" component={
-        <Main onEditProfile={handleEditProfileClick} onAddPlace={handleAddCardClick} onEditAvatar={handleEditAvatarClick} onCardClick={handleCardClick} 
-        cards={cards} onCardLike={handleCardLike} onCardDelete={handleCardDelete}>
-        </Main>
-      }  loggedIn={loggedIn}>
-      </ProtectedRoute>
-      <Route path="/">
+      <Route>
         {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
       </Route>
     </Switch>
@@ -209,4 +210,4 @@ function App() {
   );
 }
 
-export default App;
+export default withRouter(App);

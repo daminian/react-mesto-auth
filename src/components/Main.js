@@ -5,7 +5,6 @@ import {CurrentUserContext} from '../contexts/CurrentUserContext';
 const Main = ({onEditProfile, onAddPlace, onEditAvatar, onCardClick, cards, onCardLike, onCardDelete}) => {
 
     const currentUser = React.useContext(CurrentUserContext);
-    console.log(currentUser)
     
     return(
         <main className="main root__content">
@@ -19,7 +18,7 @@ const Main = ({onEditProfile, onAddPlace, onEditAvatar, onCardClick, cards, onCa
             <button className="profile__add" onClick={onAddPlace}></button>
         </section>
         <section className="grid">
-            {/* {cards.map(item => <Card key={item._id} card={item} onCardClick={onCardClick} onCardLike={onCardLike} onCardDelete={onCardDelete}/>)} */}
+            {cards.map(item => <Card key={item._id} card={item} onCardClick={onCardClick} onCardLike={onCardLike} onCardDelete={onCardDelete}/>)}
         </section>
     </main>
     )
