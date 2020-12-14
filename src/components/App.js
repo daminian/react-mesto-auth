@@ -13,7 +13,9 @@ import Login from './Login';
 import Register from './Register';
 import InfoTooltip from './InfoTooltip';
 import ProtectedRoute from './ProtectedRoute';
-import * as mestoAuth from './mestoAuth';
+import * as mestoAuth from '../utils/mestoAuth';
+import success from '../images/success.svg';
+import error from '../images/error.svg';
 
 function App() {
 
@@ -23,7 +25,7 @@ function App() {
   const [addCardIsOpen , isAddPlacePopupOpen] = React.useState(false)
   const [editAvatarIsOpen , isEditAvatarPopupOpen] = React.useState(false)
   const [selectedCard, setSelectedCard] = React.useState({state:false, src: ''});
-  const [infoTooltipIsOpen , isinfoTooltipOpen] = React.useState(false)
+  const [infoTooltipIsOpen , isinfoTooltipOpen] = React.useState({state: false, text: '', src: ''})
   const [loggedIn, setLoggedIn] = React.useState(false);
   const history = useHistory();
 
@@ -141,18 +143,30 @@ function App() {
   },[])
 
   function handleRegisterClick(password, email) {
-    isinfoTooltipOpen(true)
     mestoAuth.register(password, email)
       .then(data => {
         if (data) {
+          localStorage.setItem('email', data.data.email)
           setCurrentUser({
             ...currentUser,
             email: data.data.email
           })
+          isinfoTooltipOpen({
+            state: true,
+            text: 'Вы успешно зарегистрировались!',
+            src: success
+          })
           history.push('/sign-in')
         }
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        console.log(err)
+        isinfoTooltipOpen({
+          state: true,
+          text: 'Что-то пошло не так! Попробуйте ещё раз.',
+          src: error
+        })
+      })
   }
 
   function handleLoginClick(password, email) {
@@ -177,10 +191,12 @@ function App() {
         history.push('/')
       }
     })
+    .catch(err => console.error(err))
   }
 
   const handleLogoutClick = () => {
     localStorage.clear('token')
+    localStorage.clear('email')
     setLoggedIn(false)
   }
 
