@@ -132,33 +132,26 @@ function App() {
             }))
             setCurrentUser(userInfo)
             setCards(cardsList)
-        })
-        .catch((err) => {
+            tokenCheck(userInfo)
+          })
+          .catch((err) => {
             console.log(err)
-        })
-  },[])
+          })
+        },[])
 
-  React.useEffect(() => {
-    tokenCheck()
-  },[])
-
-  function handleRegisterClick(password, email) {
+        
+        function handleRegisterClick(password, email) {
     mestoAuth.register(password, email)
-      .then(data => {
-        if (data) {
-          localStorage.setItem('email', data.data.email)
-          setCurrentUser({
-            ...currentUser,
-            email: data.data.email
-          })
-          isinfoTooltipOpen({
-            state: true,
-            text: 'Вы успешно зарегистрировались!',
-            src: success
-          })
-          history.push('/sign-in')
-        }
-      })
+    .then(data => {
+      if (data) {
+        isinfoTooltipOpen({
+          state: true,
+          text: 'Вы успешно зарегистрировались!',
+          src: success
+        })
+        history.push('/sign-in')
+      }
+    })
       .catch(err => {
         console.log(err)
         isinfoTooltipOpen({
@@ -167,10 +160,10 @@ function App() {
           src: error
         })
       })
-  }
-
-  function handleLoginClick(password, email) {
-    mestoAuth.authorization(password, email)
+    }
+    
+    function handleLoginClick(password, email) {
+      mestoAuth.authorization(password, email)
       .then(data => {
         if(data.token) {
           localStorage.setItem('token', data.token)
@@ -180,28 +173,35 @@ function App() {
         
       })
       .catch(err => console.log(err));
-  }
-
-  function tokenCheck() {
-    const token = localStorage.getItem('token')
-    mestoAuth.getContent(token)
-    .then(res => {
-      if(res.data.email) {
-        setLoggedIn(true)
-        history.push('/')
-      }
-    })
-    .catch(err => console.error(err))
-  }
-
+    }
+    
+    function tokenCheck(userInfo) {
+      const token = localStorage.getItem('token')
+      mestoAuth.getContent(token)
+      .then(res => {
+        if(res.data.email) {
+          setCurrentUser({
+            ...userInfo,
+            email: res.data.email
+          })
+          setLoggedIn(true)
+          history.push('/')
+        }
+      })
+      .catch(err => console.error(err))
+    }
+    
   const handleLogoutClick = () => {
     localStorage.clear('token')
-    localStorage.clear('email')
+    setCurrentUser({
+      email: ''
+    })
     setLoggedIn(false)
   }
-
+  
+  console.log(currentUser)
   return (
-  <CurrentUserContext.Provider value={currentUser}>
+    <CurrentUserContext.Provider value={currentUser}>
     <Header onLinkClick={handleLogoutClick} linkText={'Выйти'}/>
     <Switch>
       <ProtectedRoute exact path="/" loggedIn={loggedIn} component={Main} onEditProfile={handleEditProfileClick} onAddPlace={handleAddCardClick} onEditAvatar={handleEditAvatarClick} onCardClick={handleCardClick} 
