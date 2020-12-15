@@ -57,7 +57,10 @@ function App() {
   function handleUpdateUser({name, about}) {
     api.updateProfileInfo({name, about})
     .then((user) => {
-      setCurrentUser(user)
+      setCurrentUser({
+        ...currentUser,
+        name: user.name,
+        about: user.about})
       closeAllPopups()
     })
     .catch((err) => {
@@ -68,7 +71,9 @@ function App() {
   function handleUpdateAvatar(avatar) {
     api.updateAvatar(avatar)
     .then((avatar) => {
-     setCurrentUser(avatar)
+     setCurrentUser({
+      ...currentUser, 
+      avatar: avatar})
      closeAllPopups()
     })
     .catch((err) => {
@@ -137,13 +142,16 @@ function App() {
           .catch((err) => {
             console.log(err)
           })
-        },[])
+  },[])
 
-        
-        function handleRegisterClick(password, email) {
+  function handleRegisterClick(password, email) {
     mestoAuth.register(password, email)
     .then(data => {
       if (data) {
+        setCurrentUser({
+          ...currentUser,
+          email: data.data.email
+        })
         isinfoTooltipOpen({
           state: true,
           text: 'Вы успешно зарегистрировались!',
@@ -166,11 +174,14 @@ function App() {
       mestoAuth.authorization(password, email)
       .then(data => {
         if(data.token) {
+          setCurrentUser({
+            ...currentUser,
+            email: email
+          })
           localStorage.setItem('token', data.token)
           setLoggedIn(true)
           history.push('/')
         }
-        
       })
       .catch(err => console.log(err));
     }
@@ -194,6 +205,7 @@ function App() {
   const handleLogoutClick = () => {
     localStorage.clear('token')
     setCurrentUser({
+      ...currentUser,
       email: ''
     })
     setLoggedIn(false)
